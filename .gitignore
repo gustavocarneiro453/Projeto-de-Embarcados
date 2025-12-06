@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Arduino/ESP32
+*.hex
+*.elf
+*.bin
+*.map
+.vscode/
+.idea/
+
+# Logs
+*.log
+mosquitto.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Fritzing
+*.fzz.bak
+
+# Documentação temporária
+docs/imagens/temp/
+

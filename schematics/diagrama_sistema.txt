@@ -1,0 +1,134 @@
+================================================================================
+                    DIAGRAMA DE SISTEMA - ESTAÇÃO METEOROLÓGICA IoT
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           SISTEMA COMPLETO                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────┐
+    │   DHT11      │
+    │  (Sensor)    │
+    │              │
+    │  Temp/Umidade│
+    └──────┬───────┘
+           │
+           │ GPIO 4
+           │
+    ┌──────▼───────┐         ┌──────────────────────────────────────────┐
+    │    ESP32     │         │         REDE Wi-Fi                      │
+    │  (NodeMCU)   │─────────┤  (Protocolo TCP/IP)                     │
+    │              │         │                                          │
+    │  - FreeRTOS  │         │  - SSID: [Nome da Rede]                 │
+    │  - Wi-Fi     │         │  - Protocolo: 802.11 b/g/n              │
+    │  - MQTT      │         │  - Segurança: WPA2                      │
+    └──────────────┘         └──────────────────────────────────────────┘
+           │
+           │ Publica tópicos MQTT:
+           │ - sensor/temperature
+           │ - sensor/humidity
+           │ - sensor/status
+           │
+           ▼
+    ┌──────────────────────────────────────────────────────────────────┐
+    │                    RASPBERRY PI                                  │
+    │                                                                   │
+    │  ┌──────────────────────────────────────────────────────────┐  │
+    │  │         Mosquitto MQTT Broker                             │  │
+    │  │  - Porta: 1883                                            │  │
+    │  │  - Protocolo: MQTT v3.1.1                                 │  │
+    │  │  - Retained Messages: Ativo                               │  │
+    │  └──────────────────────────────────────────────────────────┘  │
+    │                                                                   │
+    │  ┌──────────────────────────────────────────────────────────┐  │
+    │  │         Dashboard Web (Flask)                              │  │
+    │  │  - Framework: Flask (Python)                              │  │
+    │  │  - Porta: 5000                                            │  │
+    │  │  - Frontend: HTML5 + JavaScript + Chart.js                │  │
+    │  │  - Backend: Python + paho-mqtt                            │  │
+    │  └──────────────────────────────────────────────────────────┘  │
+    └──────────────────────────────────────────────────────────────────┘
+           │
+           │ HTTP/WebSocket
+           │
+           ▼
+    ┌──────────────────────────────────────────────────────────────────┐
+    │                    CLIENTE WEB                                    │
+    │  (Navegador - Chrome, Firefox, Edge, etc.)                        │
+    │                                                                   │
+    │  - Visualização em tempo real                                     │
+    │  - Gráficos de temperatura e umidade                              │
+    │  - Histórico de dados                                             │
+    │  - Interface responsiva                                            │
+    └──────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+                            FLUXO DE DADOS
+================================================================================
+
+1. ESP32 lê dados do DHT11 (temperatura e umidade)
+2. ESP32 conecta-se ao Wi-Fi
+3. ESP32 publica dados no broker MQTT (Raspberry Pi)
+4. Dashboard Flask subscreve aos tópicos MQTT
+5. Dashboard atualiza interface web em tempo real
+6. Cliente acessa dashboard via navegador
+
+
+================================================================================
+                            PROTOCOLOS UTILIZADOS
+================================================================================
+
+- Wi-Fi: IEEE 802.11 (TCP/IP)
+- MQTT: Message Queuing Telemetry Transport (v3.1.1)
+- HTTP: Hypertext Transfer Protocol (para dashboard web)
+- WebSocket: Para atualizações em tempo real (opcional)
+
+
+================================================================================
+                            COMPONENTES DE HARDWARE
+================================================================================
+
+1. ESP32 (NodeMCU)
+   - Microcontrolador: ESP32-D0WDQ6
+   - Wi-Fi: 802.11 b/g/n
+   - GPIO: Múltiplos pinos digitais/analógicos
+   - Alimentação: 5V via USB ou 3.3V
+
+2. Sensor DHT11
+   - Temperatura: 0-50°C (±2°C)
+   - Umidade: 20-90% RH (±5%)
+   - Interface: Digital (1-wire)
+   - Alimentação: 3.3V-5V
+
+3. Raspberry Pi
+   - Modelo: Qualquer (3B+, 4, Zero W)
+   - SO: Raspberry Pi OS (Linux)
+   - Função: Broker MQTT + Servidor Web
+
+
+================================================================================
+                            COMPONENTES DE SOFTWARE
+================================================================================
+
+1. Firmware ESP32
+   - Arduino Core for ESP32
+   - FreeRTOS (já incluído)
+   - Biblioteca PubSubClient (MQTT)
+   - Biblioteca DHT sensor library
+
+2. Raspberry Pi
+   - Mosquitto MQTT Broker
+   - Python 3.x
+   - Flask (framework web)
+   - paho-mqtt (cliente MQTT Python)
+
+3. Dashboard Web
+   - HTML5 + CSS3
+   - JavaScript (ES6+)
+   - Chart.js (gráficos)
+   - Flask (backend)
+
+
+================================================================================
+

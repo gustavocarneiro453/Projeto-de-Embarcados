@@ -1,0 +1,226 @@
+% Template de Relatório Técnico - ABNT2
+% Projeto IoT - Estação Meteorológica com ESP32
+% Sistemas Embarcados
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+
+% Configurações de página
+\geometry{
+    left=3cm,
+    right=2cm,
+    top=3cm,
+    bottom=2cm
+}
+
+% Configurações de código
+\lstset{
+    language=C++,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=2
+}
+
+% Informações do documento
+\title{Projeto IoT: Estação Meteorológica com ESP32}
+\author{Grupo X\\[0.5cm]
+        Nome do Aluno 1\\
+        Nome do Aluno 2\\
+        Nome do Aluno 3\\
+        Nome do Aluno 4}
+\date{\today}
+
+\begin{document}
+
+% Capa
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+% Sumário
+\tableofcontents
+\newpage
+
+% Introdução
+\section{Introdução}
+\label{sec:introducao}
+
+\subsection{Contexto}
+A Internet das Coisas (IoT) tem se tornado cada vez mais presente em nosso dia a dia, permitindo a conexão de dispositivos físicos à internet para coleta, processamento e visualização de dados em tempo real. Este projeto apresenta uma aplicação prática de IoT utilizando microcontroladores ESP32 para monitoramento ambiental.
+
+\subsection{Motivação}
+O monitoramento de parâmetros ambientais como temperatura e umidade é essencial em diversas aplicações, desde residências até ambientes industriais. A implementação de um sistema IoT permite o acompanhamento remoto desses parâmetros através de uma interface web, facilitando a tomada de decisões e o controle de ambientes.
+
+\subsection{Objetivos}
+\begin{itemize}
+    \item Desenvolver um sistema IoT completo utilizando ESP32 e protocolo MQTT
+    \item Implementar coleta de dados de temperatura e umidade através de sensores
+    \item Criar um dashboard web para visualização em tempo real dos dados coletados
+    \item Demonstrar a comunicação sem fio entre dispositivos embarcados e servidor
+\end{itemize}
+
+% Metodologia
+\section{Metodologia}
+\label{sec:metodologia}
+
+\subsection{Diagrama do Sistema}
+A Figura \ref{fig:diagrama} apresenta o diagrama de blocos do sistema completo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{imagens/diagrama_sistema.png}
+    \caption{Diagrama de blocos do sistema}
+    \label{fig:diagrama}
+\end{figure}
+
+\subsection{Lista de Hardware}
+\begin{itemize}
+    \item 1x Módulo ESP32 (NodeMCU)
+    \item 1x Sensor DHT11 (temperatura e umidade)
+    \item 1x Resistor 10k$\Omega$
+    \item 1x Raspberry Pi (modelo 3B+ ou superior)
+    \item Jumpers e protoboard
+    \item Fonte de alimentação USB para ESP32
+\end{itemize}
+
+\subsection{Lista de Software}
+\begin{itemize}
+    \item \textbf{Raspberry Pi:}
+    \begin{itemize}
+        \item Raspberry Pi OS (Linux)
+        \item Mosquitto MQTT Broker
+        \item Python 3.x
+        \item Flask (framework web)
+        \item paho-mqtt (biblioteca MQTT)
+    \end{itemize}
+    \item \textbf{ESP32:}
+    \begin{itemize}
+        \item Arduino IDE ou PlatformIO
+        \item Biblioteca PubSubClient (MQTT)
+        \item Biblioteca DHT sensor library
+        \item FreeRTOS (já incluído no ESP32)
+    \end{itemize}
+\end{itemize}
+
+\subsection{Fluxo de Comunicação}
+O sistema utiliza o protocolo MQTT sobre Wi-Fi para comunicação entre os dispositivos:
+
+\begin{enumerate}
+    \item O ESP32 conecta-se à rede Wi-Fi local
+    \item O sensor DHT11 é lido periodicamente (a cada 5 segundos)
+    \item Os dados são publicados no broker MQTT (Raspberry Pi) nos tópicos:
+    \begin{itemize}
+        \item \texttt{sensor/temperature}
+        \item \texttt{sensor/humidity}
+        \item \texttt{sensor/status}
+    \end{itemize}
+    \item O dashboard web (Flask) subscreve aos tópicos MQTT
+    \item Os dados são exibidos em tempo real na interface web
+\end{enumerate}
+
+% Resultados
+\section{Resultados}
+\label{sec:resultados}
+
+\subsection{Dashboard}
+A Figura \ref{fig:dashboard} apresenta a interface do dashboard web desenvolvido.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{imagens/dashboard.png}
+    \caption{Interface do dashboard web}
+    \label{fig:dashboard}
+\end{figure}
+
+\subsection{Dados Coletados}
+Os dados coletados são exibidos em tempo real através de gráficos interativos, permitindo a visualização do histórico de temperatura e umidade.
+
+\subsection{Evidências de Funcionamento}
+O sistema foi testado e validado, demonstrando:
+\begin{itemize}
+    \item Conexão estável entre ESP32 e broker MQTT
+    \item Coleta precisa de dados do sensor DHT11
+    \item Visualização em tempo real no dashboard web
+    \item Reconexão automática em caso de falhas de conexão
+\end{itemize}
+
+% Conclusão
+\section{Conclusão}
+\label{sec:conclusao}
+
+\subsection{Desafios Enfrentados}
+Durante o desenvolvimento do projeto, foram enfrentados os seguintes desafios:
+\begin{itemize}
+    \item Configuração inicial do broker MQTT no Raspberry Pi
+    \item Sincronização entre múltiplos dispositivos ESP32
+    \item Otimização da interface web para atualizações em tempo real
+\end{itemize}
+
+\subsection{Aprendizados}
+O projeto proporcionou aprendizado significativo em:
+\begin{itemize}
+    \item Programação de microcontroladores ESP32
+    \item Protocolo MQTT e sua implementação prática
+    \item Desenvolvimento de aplicações web com Flask
+    \item Integração de sistemas embarcados com servidores web
+\end{itemize}
+
+\subsection{Melhorias Futuras}
+Como melhorias futuras, sugere-se:
+\begin{itemize}
+    \item Implementação de autenticação MQTT (TLS/SSL)
+    \item Armazenamento de dados em banco de dados (PostgreSQL/MySQL)
+    \item Adição de mais sensores (pressão, qualidade do ar)
+    \item Desenvolvimento de aplicativo mobile
+    \item Implementação de alertas por e-mail/SMS
+    \item Suporte a IPv6
+\end{itemize}
+
+% Apêndices
+\appendix
+\section{Código Fonte - ESP32}
+\label{ap:codigo_esp32}
+
+O código completo do firmware ESP32 está disponível no repositório GitHub do projeto.
+
+\section{Configuração do Broker MQTT}
+\label{ap:config_mqtt}
+
+A configuração do Mosquitto MQTT Broker está disponível no diretório \texttt{raspberry-pi/broker/} do repositório.
+
+% Referências
+\begin{thebibliography}{9}
+\bibitem{esp32}
+Espressif Systems. \textit{ESP32 Technical Reference Manual}. Disponível em: \url{https://www.espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf}
+
+\bibitem{mqtt}
+OASIS. \textit{MQTT Version 3.1.1}. Disponível em: \url{https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html}
+
+\bibitem{flask}
+Flask Documentation. \textit{Flask: Web Development, One Drop at a Time}. Disponível em: \url{https://flask.palletsprojects.com/}
+
+\bibitem{dht11}
+DHT11 Datasheet. \textit{DHT11 Humidity \& Temperature Sensor}. Disponível em: \url{https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf}
+\end{thebibliography}
+
+\end{document}
+

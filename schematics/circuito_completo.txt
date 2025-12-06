@@ -1,0 +1,139 @@
+================================================================================
+                    DIAGRAMA DE CIRCUITO - SISTEMA DE IRRIGAÇÃO
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ESP32 (NodeMCU)                                      │
+│                                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │   GPIO 4     │  │   GPIO 34    │  │   GPIO 2     │  │   3.3V       │  │
+│  │   (Digital)  │  │   (Analog)   │  │   (Digital)  │  │   (Power)    │  │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  │
+│         │                  │                  │                  │          │
+└─────────┼──────────────────┼──────────────────┼──────────────────┼──────────┘
+          │                  │                  │                  │
+          │                  │                  │                  │
+    ┌─────▼─────┐      ┌─────▼─────┐      ┌─────▼─────┐      ┌─────▼─────┐
+    │  DHT11    │      │  Sensor   │      │  Módulo   │      │  3.3V     │
+    │  Sensor   │      │  Umidade  │      │   Relé    │      │  Source   │
+    │           │      │  do Solo  │      │           │      │           │
+    │  Temp/    │      │           │      │  [Relay]  │      │           │
+    │  Humidity │      │  [Analog]│      │           │      │           │
+    └───────────┘      └───────────┘      └─────┬─────┘      └───────────┘
+                                                 │
+                                                 │ NO/COM
+                                                 │
+                                          ┌──────▼──────┐
+                                          │   Bomba/    │
+                                          │   Válvula   │
+                                          │   Solenoide │
+                                          └─────────────┘
+
+
+================================================================================
+                            DETALHAMENTO DAS CONEXÕES
+================================================================================
+
+1. SENSOR DHT11
+   ┌─────────────┐
+   │    DHT11    │
+   │             │
+   │ VCC ────┐   │
+   │ DATA ───┼───┼─── GPIO 4 (ESP32)
+   │ GND ────┼───┼─── GND (ESP32)
+   └─────────┘   │
+                 │
+                 │ Resistor 10kΩ
+                 │ (pull-up)
+                 │
+                 └─── 3.3V (ESP32)
+
+
+2. SENSOR DE UMIDADE DO SOLO
+   ┌─────────────────┐
+   │  Sensor Solo    │
+   │  (Analógico)     │
+   │                  │
+   │ VCC ─────────────┼─── 3.3V (ESP32)
+   │ A0  ─────────────┼─── GPIO 34 (ESP32) - ADC1_CH6
+   │ GND ─────────────┼─── GND (ESP32)
+   └──────────────────┘
+
+
+3. MÓDULO RELÉ
+   ┌─────────────────┐
+   │   Módulo Relé   │
+   │   (1 Canal)      │
+   │                  │
+   │ VCC ─────────────┼─── 5V ou 3.3V (ESP32) - depende do módulo
+   │ IN  ─────────────┼─── GPIO 2 (ESP32)
+   │ GND ─────────────┼─── GND (ESP32)
+   │                  │
+   │ NO  ─────────────┼─── Terminal positivo da bomba/válvula
+   │ COM ─────────────┼─── Fonte de alimentação (12V/24V)
+   │ NC  ─────────────┼─── (não usado)
+   └──────────────────┘
+
+
+4. ALIMENTAÇÃO DA BOMBA/VÁLVULA
+   ┌─────────────┐
+   │  Fonte 12V  │
+   │  ou 24V     │
+   └──────┬──────┘
+          │
+          ├─── COM (Relé)
+          │
+          └─── Bomba/Válvula Solenoide
+               │
+               └─── NO (Relé)
+
+
+================================================================================
+                            ESPECIFICAÇÕES TÉCNICAS
+================================================================================
+
+ESP32:
+- GPIO 4:  Digital (DHT11)
+- GPIO 34: Analógico (ADC1_CH6) - Sensor de umidade do solo
+- GPIO 2:  Digital (Controle do relé)
+- Alimentação: 5V via USB ou 3.3V externa
+
+Sensor DHT11:
+- Temperatura: 0-50°C (±2°C)
+- Umidade do ar: 20-90% RH (±5%)
+- Interface: Digital (1-wire)
+- Alimentação: 3.3V-5V
+
+Sensor de Umidade do Solo:
+- Tipo: Analógico
+- Faixa: 0-100% (mapeado)
+- Alimentação: 3.3V
+- Resolução: 12 bits (0-4095)
+
+Módulo Relé:
+- Tipo: Relé de estado sólido ou eletromecânico
+- Tensão de controle: 3.3V ou 5V (depende do módulo)
+- Corrente máxima: Verificar especificações do módulo
+- Tensão de carga: Até 250VAC/30VDC (verificar especificações)
+
+Bomba/Válvula:
+- Tipo: Bomba de água ou válvula solenoide
+- Tensão: 12V ou 24V DC (verificar especificações)
+- Corrente: Verificar consumo e capacidade do relé
+
+
+================================================================================
+                            NOTAS IMPORTANTES
+================================================================================
+
+⚠️ ATENÇÃO:
+1. Use um módulo relé adequado para a corrente da bomba/válvula
+2. Se a bomba/válvula consumir muita corrente, use um relé externo
+3. Proteja o circuito com fusível adequado
+4. Use diodo de proteção reversa se usar relé eletromecânico
+5. Verifique a polaridade da bomba/válvula
+6. O sensor de umidade do solo pode variar conforme o modelo - ajuste os
+   valores de calibração no código conforme necessário
+
+================================================================================
+

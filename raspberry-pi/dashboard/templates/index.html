@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Irrigação Automática IoT</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .relay-control {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .relay-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .relay-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .relay-on {
+            background-color: #4CAF50;
+            box-shadow: 0 0 10px #4CAF50;
+        }
+
+        .relay-off {
+            background-color: #f44336;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-on {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-on:hover {
+            background-color: #45a049;
+        }
+
+        .btn-off {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-off:hover {
+            background-color: #da190b;
+        }
+
+        .btn-auto {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .btn-auto:hover {
+            background-color: #0b7dda;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-online {
+            background-color: #4CAF50;
+        }
+
+        .status-offline {
+            background-color: #f44336;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .card-unit {
+            font-size: 0.6em;
+            color: #999;
+            margin-left: 5px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .last-update {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💧 Sistema de Irrigação Automática IoT</h1>
+            <p>
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText">Conectando...</span>
+            </p>
+        </header>
+
+        <div class="cards">
+            <div class="card">
+                <div class="card-title">Temperatura do Ar</div>
+                <div class="card-value">
+                    <span id="temperature">--</span>
+                    <span class="card-unit">°C</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Umidade do Ar</div>
+                <div class="card-value">
+                    <span id="humidity">--</span>
+                    <span class="card-unit">%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Umidade do Solo</div>
+                <div class="card-value">
+                    <span id="soilMoisture">--</span>
+                    <span class="card-unit">%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="relay-control">
+            <div class="relay-status">
+                <div>
+                    <h2 style="margin: 0; color: #333;">🔌 Controle de Irrigação</h2>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">
+                        Status: <span class="relay-indicator" id="relayIndicator"></span>
+                        <span id="relayStatusText">--</span>
+                    </p>
+                </div>
+            </div>
+            <div class="control-buttons">
+                <button class="btn btn-on" onclick="controlRelay('ON')" id="btnOn">Ligar Irrigação</button>
+                <button class="btn btn-off" onclick="controlRelay('OFF')" id="btnOff">Desligar Irrigação</button>
+                <button class="btn btn-auto" onclick="controlRelay('AUTO')" id="btnAuto">Modo Automático</button>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">📊 Histórico de Temperatura</div>
+            <canvas id="temperatureChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">💧 Histórico de Umidade do Ar</div>
+            <canvas id="humidityChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">🌱 Histórico de Umidade do Solo</div>
+            <canvas id="soilMoistureChart"></canvas>
+        </div>
+
+        <div class="last-update">
+            Última atualização: <span id="lastUpdate">--</span>
+        </div>
+    </div>
+
+    <script>
+        // Configuração dos gráficos
+        const tempCtx = document.getElementById('temperatureChart').getContext('2d');
+        const humidityCtx = document.getElementById('humidityChart').getContext('2d');
+        const soilCtx = document.getElementById('soilMoistureChart').getContext('2d');
+
+        const tempChart = new Chart(tempCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Temperatura (°C)',
+                    data: [],
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+        const humidityChart = new Chart(humidityCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Umidade do Ar (%)',
+                    data: [],
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        const soilMoistureChart = new Chart(soilCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Umidade do Solo (%)',
+                    data: [],
+                    borderColor: 'rgb(76, 175, 80)',
+                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Função para atualizar dados
+        async function updateData() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+
+                // Atualizar valores
+                document.getElementById('temperature').textContent = data.temperature.toFixed(1);
+                document.getElementById('humidity').textContent = data.humidity.toFixed(1);
+                document.getElementById('soilMoisture').textContent = data.soil_moisture || '--';
+                document.getElementById('lastUpdate').textContent = data.last_update || '--';
+
+                // Atualizar status do relé
+                const relayIndicator = document.getElementById('relayIndicator');
+                const relayStatusText = document.getElementById('relayStatusText');
+                const relayStatus = data.relay_status || 'OFF';
+                
+                if (relayStatus === 'ON') {
+                    relayIndicator.className = 'relay-indicator relay-on';
+                    relayStatusText.textContent = 'Irrigação ATIVA';
+                } else {
+                    relayIndicator.className = 'relay-indicator relay-off';
+                    relayStatusText.textContent = 'Irrigação INATIVA';
+                }
+
+                // Atualizar status
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+                
+                if (data.status === 'online') {
+                    statusIndicator.className = 'status-indicator status-online';
+                    statusText.textContent = 'Sensor Online';
+                } else {
+                    statusIndicator.className = 'status-indicator status-offline';
+                    statusText.textContent = 'Sensor Offline';
+                }
+
+                // Atualizar histórico
+                updateHistory();
+            } catch (error) {
+                console.error('Erro ao atualizar dados:', error);
+            }
+        }
+
+        // Função para atualizar histórico
+        async function updateHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const history = await response.json();
+
+                // Atualizar gráfico de temperatura
+                const tempLabels = history.timestamps.map(ts => {
+                    const date = new Date(ts);
+                    return date.toLocaleTimeString('pt-BR');
+                });
+                tempChart.data.labels = tempLabels;
+                tempChart.data.datasets[0].data = history.temperature;
+                tempChart.update();
+
+                // Atualizar gráfico de umidade do ar
+                humidityChart.data.labels = tempLabels;
+                humidityChart.data.datasets[0].data = history.humidity;
+                humidityChart.update();
+
+                // Atualizar gráfico de umidade do solo
+                const soilLabels = history.timestamps.map(ts => {
+                    const date = new Date(ts);
+                    return date.toLocaleTimeString('pt-BR');
+                });
+                soilMoistureChart.data.labels = soilLabels;
+                soilMoistureChart.data.datasets[0].data = history.soil_moisture;
+                soilMoistureChart.update();
+            } catch (error) {
+                console.error('Erro ao atualizar histórico:', error);
+            }
+        }
+
+        // Função para controlar o relé
+        async function controlRelay(command) {
+            try {
+                const response = await fetch('/api/relay/control', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ command: command })
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    console.log(`Comando enviado: ${command}`);
+                } else {
+                    console.error('Erro ao enviar comando:', data.message);
+                }
+            } catch (error) {
+                console.error('Erro ao controlar relé:', error);
+            }
+        }
+
+        // Atualizar dados a cada 2 segundos
+        setInterval(updateData, 2000);
+        updateData(); // Primeira atualização imediata
+    </script>
+</body>
+</html>
+
