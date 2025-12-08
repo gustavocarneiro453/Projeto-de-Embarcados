@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Sistema de Irrigação Automática IoT</title>
 
-    <!-- Chart.js via CDN (padrão em exemplos Flask + Chart.js) -->
+    <!-- Chart.js via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <style>
@@ -201,13 +201,6 @@
             font-size: 0.9em;
         }
     </style>
-
-    <!-- URLs geradas pelo Flask (padrão recomendado) -->
-    <script>
-        const DATA_URL   = {{ url_for('get_data')|tojson }};
-        const HISTORY_URL = {{ url_for('get_history')|tojson }};
-        const RELAY_URL  = {{ url_for('control_relay')|tojson }};
-    </script>
 </head>
 <body>
     <div class="container">
@@ -288,7 +281,7 @@
         // Atualiza dados atuais
         async function updateData() {
             try {
-                const response = await fetch(DATA_URL);
+                const response = await fetch('/api/data');
                 const data = await response.json();
 
                 const soilEl = document.getElementById('soilMoisture');
@@ -347,7 +340,7 @@
         // Atualiza histórico para o gráfico
         async function updateHistory() {
             try {
-                const response = await fetch(HISTORY_URL);
+                const response = await fetch('/api/history');
                 const history = await response.json();
 
                 const labels = (history.timestamps || []).map(ts => {
@@ -366,7 +359,7 @@
         // Envia comandos para o relé
         async function controlRelay(command) {
             try {
-                const response = await fetch(RELAY_URL, {
+                const response = await fetch('/api/relay/control', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
