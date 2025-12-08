@@ -1,6 +1,6 @@
 """
 Dashboard Web para Monitoramento de Dados do Sensor
-Sistema IoT - Estação Meteorológica
+Sistema IoT - Irrigação (somente umidade do solo)
 """
 
 from datetime import datetime
@@ -19,13 +19,10 @@ app = Flask(__name__)
 try:
     import config as app_config
 except ImportError:
-    # Fallback simples se config.py não existir
     class app_config:
         MQTT_BROKER = "localhost"
         MQTT_PORT = 1883
         MQTT_TOPICS = [
-            "sensor/temperature",
-            "sensor/humidity",
             "sensor/soil_moisture",
             "actuator/relay_status",
             "sensor/status",
@@ -42,15 +39,11 @@ HISTORY_SIZE = getattr(app_config, "MAX_HISTORY_SIZE", 100)
 # =========================
 
 data_history = {
-    "temperature": deque(maxlen=HISTORY_SIZE),
-    "humidity": deque(maxlen=HISTORY_SIZE),
     "soil_moisture": deque(maxlen=HISTORY_SIZE),
     "timestamps": deque(maxlen=HISTORY_SIZE),
 }
 
 current_data = {
-    "temperature": 0.0,
-    "humidity": 0.0,
     "soil_moisture": 0,
     "relay_status": "OFF",
     "status": "offline",
@@ -64,8 +57,6 @@ data_lock = threading.Lock()
 # =========================
 
 DEFAULT_MQTT_TOPICS = [
-    "sensor/temperature",
-    "sensor/humidity",
     "sensor/soil_moisture",
     "actuator/relay_status",
     "sensor/status",
@@ -75,7 +66,6 @@ MQTT_BROKER = getattr(app_config, "MQTT_BROKER", "localhost")
 MQTT_PORT = getattr(app_config, "MQTT_PORT", 1883)
 MQTT_TOPICS = getattr(app_config, "MQTT_TOPICS", DEFAULT_MQTT_TOPICS)
 
-# Cliente MQTT para publicação de comandos
 mqtt_publisher = mqtt.Client()
 mqtt_client = mqtt.Client()
 
@@ -86,7 +76,6 @@ def on_connect(client, userdata, flags, rc):
         for topic in MQTT_TOPICS:
             client.subscribe(topic)
             print(f"📡 Inscrito no tópico: {topic}")
-        # Tópico de controle (confirmações/comandos)
         client.subscribe("actuator/relay_control")
     else:
         print(f"❌ Falha na conexão MQTT. Código: {rc}")
@@ -99,25 +88,11 @@ def on_message(client, userdata, msg):
 
     try:
         with data_lock:
-            if topic == "sensor/temperature":
-                value = float(payload)
-                current_data["temperature"] = value
-                data_history["temperature"].append(value)
-                data_history["timestamps"].append(timestamp.isoformat())
-
-            elif topic == "sensor/humidity":
-                value = float(payload)
-                current_data["humidity"] = value
-                data_history["humidity"].append(value)
-
-            elif topic == "sensor/soil_moisture":
+            if topic == "sensor/soil_moisture":
                 value = int(payload)
                 current_data["soil_moisture"] = value
                 data_history["soil_moisture"].append(value)
-                if len(data_history["timestamps"]) < len(
-                    data_history["soil_moisture"]
-                ):
-                    data_history["timestamps"].append(timestamp.isoformat())
+                data_history["timestamps"].append(timestamp.isoformat())
 
             elif topic == "actuator/relay_status":
                 current_data["relay_status"] = payload.upper()
@@ -166,8 +141,6 @@ def get_data():
 def get_history():
     with data_lock:
         history_payload = {
-            "temperature": list(data_history["temperature"]),
-            "humidity": list(data_history["humidity"]),
             "soil_moisture": list(data_history["soil_moisture"]),
             "timestamps": list(data_history["timestamps"]),
         }
