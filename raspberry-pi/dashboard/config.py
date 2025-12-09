@@ -6,9 +6,10 @@ Configurações da aplicação Flask + MQTT para o dashboard IoT.
 # Configurações MQTT
 # =========================
 
-# IMPORTANTE: aqui vai o IP DO SEU PC (onde o Mosquitto está rodando)
-# ipconfig mostrou: 192.168.3.11
-MQTT_BROKER = "192.168.3.11"
+# IMPORTANTE: IP DO SEU PC (onde o Mosquitto está rodando)
+# Na faculdade, o ipconfig mostrou: 172.26.69.22
+# (Se quiser algo que funcione em qualquer rede, você também pode usar "localhost")
+MQTT_BROKER = "172.26.69.22"
 MQTT_PORT = 1883
 
 # Tópicos de sensores (batendo com a ESP32)
