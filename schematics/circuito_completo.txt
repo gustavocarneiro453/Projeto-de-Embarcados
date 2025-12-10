@@ -14,11 +14,11 @@
           │                  │                  │                  │
           │                  │                  │                  │
     ┌─────▼─────┐      ┌─────▼─────┐      ┌─────▼─────┐      ┌─────▼─────┐
-    │  DHT11    │      │  Sensor   │      │  Módulo   │      │  3.3V     │
-    │  Sensor   │      │  Umidade  │      │   Relé    │      │  Source   │
+    │  00000    │      │  Sensor   │      │  Módulo   │      │  3.3V     │
+    │  000000   │      │  Umidade  │      │   Relé    │      │  Source   │
     │           │      │  do Solo  │      │           │      │           │
-    │  Temp/    │      │           │      │  [Relay]  │      │           │
-    │  Humidity │      │  [Analog]│      │           │      │           │
+    │  00000    │      │           │      │  [Relay]  │      │           │
+    │  00000000 │      │  [Analog] │      │           │      │           │
     └───────────┘      └───────────┘      └─────┬─────┘      └───────────┘
                                                  │
                                                  │ NO/COM
@@ -34,22 +34,10 @@
                             DETALHAMENTO DAS CONEXÕES
 ================================================================================
 
-1. SENSOR DHT11
-   ┌─────────────┐
-   │    DHT11    │
-   │             │
-   │ VCC ────┐   │
-   │ DATA ───┼───┼─── GPIO 4 (ESP32)
-   │ GND ────┼───┼─── GND (ESP32)
-   └─────────┘   │
-                 │
-                 │ Resistor 10kΩ
-                 │ (pull-up)
-                 │
-                 └─── 3.3V (ESP32)
 
 
-2. SENSOR DE UMIDADE DO SOLO
+
+1. SENSOR DE UMIDADE DO SOLO
    ┌─────────────────┐
    │  Sensor Solo    │
    │  (Analógico)     │
@@ -60,7 +48,7 @@
    └──────────────────┘
 
 
-3. MÓDULO RELÉ
+2. MÓDULO RELÉ
    ┌─────────────────┐
    │   Módulo Relé   │
    │   (1 Canal)      │
@@ -75,7 +63,7 @@
    └──────────────────┘
 
 
-4. ALIMENTAÇÃO DA BOMBA/VÁLVULA
+3. ALIMENTAÇÃO DA BOMBA/VÁLVULA
    ┌─────────────┐
    │  Fonte 12V  │
    │  ou 24V     │
@@ -98,11 +86,7 @@ ESP32:
 - GPIO 2:  Digital (Controle do relé)
 - Alimentação: 5V via USB ou 3.3V externa
 
-Sensor DHT11:
-- Temperatura: 0-50°C (±2°C)
-- Umidade do ar: 20-90% RH (±5%)
-- Interface: Digital (1-wire)
-- Alimentação: 3.3V-5V
+
 
 Sensor de Umidade do Solo:
 - Tipo: Analógico

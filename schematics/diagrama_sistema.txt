@@ -7,10 +7,10 @@
 └─────────────────────────────────────────────────────────────────────────────┘
 
     ┌──────────────┐
-    │   DHT11      │
+    │   sensor de humidade      │
     │  (Sensor)    │
     │              │
-    │  Temp/Umidade│
+    │  Umidade│
     └──────┬───────┘
            │
            │ GPIO 4
@@ -67,7 +67,7 @@
                             FLUXO DE DADOS
 ================================================================================
 
-1. ESP32 lê dados do DHT11 (temperatura e umidade)
+1. ESP32 lê dados do sensor de umidade
 2. ESP32 conecta-se ao Wi-Fi
 3. ESP32 publica dados no broker MQTT (Raspberry Pi)
 4. Dashboard Flask subscreve aos tópicos MQTT
@@ -95,11 +95,7 @@
    - GPIO: Múltiplos pinos digitais/analógicos
    - Alimentação: 5V via USB ou 3.3V
 
-2. Sensor DHT11
-   - Temperatura: 0-50°C (±2°C)
-   - Umidade: 20-90% RH (±5%)
-   - Interface: Digital (1-wire)
-   - Alimentação: 3.3V-5V
+
 
 3. Raspberry Pi
    - Modelo: Qualquer (3B+, 4, Zero W)
